@@ -1,0 +1,41 @@
+version: '3'
+services:
+  squid:
+    image: sameersbn/squid:latest
+    volumes:
+      - ./proxy/squid.conf:/etc/squid/squid.conf
+    ports:
+      - "3128:3128"
+    networks:
+      - mynetwork
+    restart: unless-stopped
+    mem_limit: 512m
+
+  server:
+    build:
+        context: ./server
+        dockerfile: Dockerfile
+    ports:
+      - "8080:3000"
+    networks:
+      - mynetwork
+    volumes:
+      - ./server/app.js:/app/app.js
+    working_dir: /app
+    entrypoint: ["node", "app.js"]
+
+  client:
+    build:
+        context: ./client
+        dockerfile: Dockerfile
+    #ports:
+    #  - "8080:3000"
+    networks:
+      - mynetwork
+    volumes:
+      - ./client:/app
+    working_dir: /app
+    entrypoint: ["sleep", "infinity"]
+networks:
+  mynetwork:
+    driver: bridge
